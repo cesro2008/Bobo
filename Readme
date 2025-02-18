@@ -1,0 +1,33 @@
+import time import cv2 import numpy as np import serial from gps import gps, WATCH_ENABLE, WATCH_NEWSTYLE import RPi.GPIO as GPIO
+
+Setup GPS
+
+session = gps(mode=WATCH_ENABLE|WATCH_NEWSTYLE)
+
+def get_gps(): try: report = session.next() if report['class'] == 'TPV': return report.lat, report.lon except Exception as e: print("GPS Error:", e) return None, None
+
+Setup Motor Control
+
+MOTOR_LEFT = 17 MOTOR_RIGHT = 18 GPIO.setmode(GPIO.BCM) GPIO.setup(MOTOR_LEFT, GPIO.OUT) GPIO.setup(MOTOR_RIGHT, GPIO.OUT)
+
+def move_forward(): GPIO.output(MOTOR_LEFT, GPIO.HIGH) GPIO.output(MOTOR_RIGHT, GPIO.HIGH)
+
+def stop(): GPIO.output(MOTOR_LEFT, GPIO.LOW) GPIO.output(MOTOR_RIGHT, GPIO.LOW)
+
+Obstacle Detection with OpenCV
+
+cap = cv2.VideoCapture(0)
+
+def detect_obstacle(): ret, frame = cap.read() if not ret: return False gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) edges = cv2.Canny(gray, 50, 150) if np.sum(edges) > 100000:  # Adjust threshold print("Obstacle Detected!") return True return False
+
+AI Navigation Loop
+
+while True: lat, lon = get_gps() print(f"Current GPS: {lat}, {lon}")
+
+if detect_obstacle():
+    stop()
+    time.sleep(2)
+else:
+    move_forward()
+
+time.sleep(1)
