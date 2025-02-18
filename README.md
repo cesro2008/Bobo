@@ -17,7 +17,7 @@
             padding: 20px;
             background: white;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba (0, 0, 0, 0.1);
             text-align: center;
         }
         h1 {
@@ -35,7 +35,25 @@
     </div>
 </body>
 </html>
+from telegram import Update
+from telegram.ext import Updater, CommandHandler, CallbackContext
 
+TOKEN = "YOUR_BOT_TOKEN"
+
+def start(update: Update, context: CallbackContext):
+    update.message.reply_text("Hello! I'm your bot.")
+
+def help_command(update: Update, context: CallbackContext):
+    update.message.reply_text("Here are the available commands:\n/start - Start bot\n/help - Show help")
+
+updater = Updater(TOKEN, use_context=True)
+dispatcher = updater.dispatcher
+
+dispatcher.add_handler(CommandHandler("start", start))
+dispatcher.add_handler(CommandHandler("help", help_command))
+
+updater.start_polling()
+updater.idle()
 
 
 
